@@ -1,0 +1,216 @@
+@font-face {
+    font-family: JetBrains;
+    src: url("font/JetBrainsMono-Light.ttf");
+}
+
+.editor * {
+    font-family: 'JetBrains', 'monospace';
+    font-size: var(--editor-font-size);
+    letter-spacing: 2px;
+    white-space: pre;
+    tab-size: 4;
+    user-select: none;
+
+    box-sizing: border-box;
+}
+
+.editor div {
+    display: flex;
+}
+
+.editor {
+    width: min-content;
+    height: min-content;
+
+    --editor-width: 0;
+    --editor-height: 0;
+    --editor-font-size: 0;
+    --editor-line-height: 0;
+    --editor-caret-height: 0;
+    --editor-gutter-width: 0;
+
+    --editor-scroll-offsetY: 0px;
+    --editor-gutter-num-size: 0px;
+}
+
+.editor .editor-sizer {
+    position: absolute;
+    opacity: 0;
+    left: 10000px;
+    width: min-content;
+    height: min-content;
+}
+
+.editor .editor-view {
+    background: var(--root-bg);
+    width: var(--editor-width);
+    height: var(--editor-height);
+
+    border: 1px solid var(--root-border-color);
+
+    overflow: hidden;
+
+    box-sizing: content-box;
+    padding-top: 5px;
+}
+
+.editor .editor-gutter {
+    width: calc(var(--editor-gutter-width) + var(--editor-gutter-num-size));
+    height: var(--editor-height);
+    padding-right: 2px;
+    border-right: 1px solid var(--root-border-color);
+    color: var(--gutter-color);
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
+    position: relative;
+}
+
+.editor .editor-layers {
+    cursor: text;
+    flex-direction: column;
+    position: relative;
+
+    width: calc(var(--editor-width) - (var(--editor-gutter-width) + var(--editor-gutter-num-size) / 2));
+    height: 100%;
+}
+
+.editor .editor-layer {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    padding-left: 2px;
+}
+
+.editor .layer-active-line {
+    z-index: 1;
+    padding-left: 0;
+}
+
+.editor .layer-selection {
+    z-index: 2;
+}
+
+.editor .layer-inner {
+    z-index: 3;
+    flex-direction: column;
+    color: #d6d1d1;
+}
+
+.editor .layer-caret {
+    z-index: 4;
+}
+
+.editor .editor-caret {
+    position: absolute;
+    pointer-events: none;
+    opacity: 1;
+
+    width: 0;
+    height: var(--editor-caret-height);
+
+    border-right: 2px solid white;
+
+    margin-top: calc((var(--editor-line-height) - var(--editor-caret-height)) / 2);
+    top: 0;
+    left: 0;
+}
+
+.editor .editor-caret.blink {
+    opacity: 0;
+}
+
+.editor .editor-line,
+.editor .editor-active-line,
+.editor .editor-gutter-line {
+    position: relative;
+    left: 0;
+    width: calc(var(--editor-width) - var(--editor-gutter-width) - 3px);
+    height: var(--editor-line-height);
+    max-height: var(--editor-line-height);
+    min-height: var(--editor-line-height);
+    padding-left: 2px;
+}
+
+.editor .editor-line {
+    justify-content: flex-start;
+    align-items: center;
+    top: calc(-1 * var(--editor-line-height) + var(--editor-scroll-offsetY));
+}
+
+.editor .editor-gutter-line {
+    top: calc(-1 * var(--editor-line-height) + var(--editor-scroll-offsetY));
+    width: 100%;
+    padding-left: calc(max(20px - var(--editor-gutter-num-size) / 2, 10px));
+}
+
+.editor .line-number {
+    text-align: right;
+    width: var(--editor-gutter-num-size);
+}
+
+.editor .editor-active-line {
+    position: absolute;
+    background: #2b2e38;
+}
+
+.editor-input {
+    width: 1em;
+    height: var(--editor-line-height);
+    opacity: 0;
+    position: relative;
+    caret-color: transparent;
+}
+
+.editor .editor-input, .editor .editor-caret {
+    translate: 2px 0;
+}
+
+.editor-selection {
+    position: absolute;
+    background: var(--editor-selection-color);
+    height: var(--editor-line-height);
+    translate: 3px 0;
+}
+
+.selection-body {
+    width: 100%;
+    left: 0;
+}
+
+.selection-end {
+    left: 0px;
+}
+
+.editor.dark {
+    --root-bg: #1e1f24;
+    --root-border-color: #93969f;
+    --gutter-color: #93969f;
+
+    --editor-selection-color: #213c73;
+}
+
+
+/*-------------+
+| HIGHLIGHTING |
++--------------*/
+
+.inline-icon {
+    background: #44464c;
+    border-radius: 6px;
+    padding: 3px 2px 3px 3px;
+    color: #888f8f;
+    margin: 0 1px 0 5px;
+    font-size: .8em;
+    letter-spacing: -1px;
+}
+
+/*
+
+.editor .tab:first-child:not(:last-of-type), .editor .tab:not(*:not(.tab) ~ .tab):not(:has(+ span:not(.tab))) {
+    border-right: 1px solid grey;
+}
+
+*/

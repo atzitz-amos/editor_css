@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Editor</title>
+        <link rel="stylesheet" href="./editor/editor.css">
+
+        <script src="./editor/parser/parser.js"></script>
+        <script src="./editor/parser/jslang.js"></script>
+
+        <script src="./editor/properties.js"></script>
+        <script src="./editor/events.js"></script>
+        <script src="./editor/commands.js"></script>
+        <script src="./editor/components.js"></script>
+        <script src="./editor/view.js"></script>
+        <script src="./editor/editor.js"></script>
+
+        <style>body {
+            max-width: 100vw;
+            max-height: 100vh;
+            flex-direction: column;
+            margin: 0;
+        }</style>
+    </head>
+    <body>
+        <div class="content"
+             style="width: 100%; height: 100%; position: fixed; top: 50px; left: 50px; padding: 50px;"></div>
+
+        <script>
+            let e;
+            window.onload = () => {
+                e = editor.create(document.querySelector('.content'));
+            }
+        </script>
+    </body>
+</html>
