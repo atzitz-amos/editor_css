@@ -9,6 +9,7 @@
     };
     e.parser.TokenTypes = {
         EOF: "EOF",
+        EOL: "EOL",
         EQ: "EQ",
         IDENTIFIER: "IDENTIFIER",
         KEYWORD: "KEYWORD",
@@ -16,6 +17,7 @@
         NUMBER: "NUMBER",
         OPERATOR: "OPERATOR",
         OP_EQ: "OP_EQ",
+        OP_LOGICAL: "OP_LOGICAL",
         COMPARISON: "COMPARISON",
         ARROW: "ARROW",
         COMMA: "COMMA",
@@ -81,11 +83,12 @@
         }
 
         slice(end) {
-            return this.value.slice(1, end);
+            return this.value.slice(0, end);
         }
 
         jump(n) {
             this.value = this.value.slice(n);
+            this.ccol += n;
         }
 
         push(c) {
@@ -121,23 +124,27 @@
             },
 
             seek: function () {
-                return this.lookAhead(0);
+                return this.lookAhead(1);
             },
             lookAhead: function (d) {
-                while (this.tokens.length <= this.index + d) {
+                while (this.tokens.length < this.index + d) {
                     this.tokens.push(this.lang.tokenize(this));
                 }
+                return this.tokens[this.index + d - 1];
             },
             consume: function () {
                 let t = this.seek();
                 this.index++;
                 return t;
             },
-            lookBehind: function (d) {
+            lookBehind: function (d = 1) {
                 return this.tokens[this.index - d];
             }
         };
     };
+    e.parser.createParser = (lang, code) => {
+        return new lang.parser(e.parser.createTokenizer(lang, code));
+    }
 
     e.parser.languages = {};
 

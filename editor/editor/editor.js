@@ -46,7 +46,6 @@
         }
 
         setActive(active) {
-            console.log(active)
             this.selectionActive = active;
         }
 
@@ -126,7 +125,6 @@
                     offset += icon.width;
                 }
             }
-            console.log("o:", offset);
             return offset;
         }
 
@@ -140,8 +138,8 @@
             return offset;
         }
 
-        render() {
-            let result = this._render();
+        render(editor) {
+            let result = this._render(editor);
             for (let icon of this.inlineIcons) {
                 for (let i = 0; i < result.length; i++) {
                     let start = result[i].position;
@@ -156,15 +154,8 @@
             return result.map(x => x.render());
         }
 
-        _render() {
-            let result = [];
-            let i = 0;
-            for (let txt of this.content.split("    ")) {
-                txt !== "" && result.push(new e.components.Text(txt, i));
-                result.push(new e.components.Tab(i + txt.length));
-                i += txt.length + 4;
-            }
-            return result.slice(0, result.length - 1);
+        _render(editor) {
+            return e.parser.highlighter.highlight(editor, this.content, "js");
         }
 
         selectWord(pos) {
@@ -565,6 +556,18 @@
                 let tw = Math.round((this.view.scroll.scrollX + x - this.data.lines[lh].getVisualOffsetFromVisual(this.view.scroll.scrollX + x)) / this.C.get("view.line.charSize"));
                 this.command("caret/moveTo", tw, lh);
             });
+        }
+
+        markError(err) {
+            let start = err.loc[0];
+
+            while (start <= err.loc[2]) {
+                this.view.markError(start++, err);
+            }
+        }
+
+        resetErrors() {
+            this.view.resetErrors();
         }
     }
 

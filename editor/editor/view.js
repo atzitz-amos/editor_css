@@ -124,6 +124,43 @@
             update() {
                 this._activeLine.style.top = this.view.C.get("view.line.height") * this.view.editor.data.activeLine - this.view.scroll.scrollY + "px";
             }
+        },
+
+        _LayerError: class {
+            constructor(view) {
+                this.view = view;
+
+                this.E = $$("div.editor-layer.layer-error", view.layers);
+            }
+
+            update() {
+                this.E.innerHTML = "";
+                for (let [line, err] of Object.entries(this.view.gutter.errors)) {
+                    err.forEach(x => this.updateError(line, x));
+                }
+            }
+
+            updateError(line, err) {
+                console.log(line, err);
+                let y = this.view.C.get("view.line.height") * line - this.view.scroll.scrollY;
+                let x = (err.loc[1]) * this.view.C.get("view.line.charSize") - this.view.scroll.scrollX;
+                let ex = err.loc[3] * this.view.C.get("view.line.charSize") - this.view.scroll.scrollX;
+                // noinspection EqualityComparisonWithCoercionJS
+                if (err.loc[2] != line) { // Full line
+                    ex = this.view.editor.data.lines[line].length * this.view.C.get("view.line.charSize") - this.view.scroll.scrollX;
+                }
+                let error = $$("div.editor-error", this.E);
+                let message = $$("div.error-msg", error);
+                message.innerText = err.message;
+
+                if (ex === x) {
+                    ex += this.view.C.get("view.line.charSize");
+                }
+
+                error.style.top = y + "px";
+                error.style.left = x + "px";
+                error.style.width = ex - x + "px";
+            }
         }
     }
 
@@ -191,16 +228,6 @@
         }
     }
 
-    class GutterLine {
-        constructor(gutter, lineNo) {
-            this.gutter = gutter;
-            this.lineNo = lineNo;
-
-            this.E = $$("div.editor-gutter-line", gutter.E);
-            this.E.textContent = lineNo + 1;
-        }
-    }
-
     class Gutter {
         constructor(view) {
             this.view = view;
@@ -209,6 +236,8 @@
 
             this.lineCount = Math.floor(view.C.get("view.height") / view.C.get("view.line.height"));
             this.lines = this.buildLines();
+
+            this.errors = {};
         }
 
         buildLines() {
@@ -224,7 +253,7 @@
 
         set(start, end) {
             for (let i = 0; i < this.lineCount; i++) {
-                if (start + i >= end) this.lines[i].innerHTML = ""; else this.lines[i].innerHTML = `<span class='line-number'>${start + i + 1}</span>`;
+                if (start + i >= end) this.lines[i].innerHTML = ""; else this.lines[i].innerHTML = this.render(i + start);
             }
         }
 
@@ -232,6 +261,20 @@
             this.view.C.set("gutter.numLength", length);
         }
 
+        markError(line, err) {
+            if (!(line in this.errors)) {
+                this.errors[line] = [];
+            }
+            this.errors[line].push(err);
+        }
+
+        render(index) {
+            let a = `<span class='line-number'>${index + 1}</span>`
+            if (index in this.errors) {
+                a += `<span class='error-icon'></span>`;
+            }
+            return a;
+        }
     }
 
     class View {
@@ -268,6 +311,7 @@
             this.layer_caret = new _Layers._LayerCaret(this);
             this.layer_selection = new _Layers._LayerSelection(this);
             this.layer_active_line = new _Layers._LayerActiveLine(this);
+            this.layer_error = new _Layers._LayerError(this);
 
             this.C.define("view.scroll.offsetY", "i", 0, "px", EDITOR.properties.style_updater(this.view, "--editor-scroll-offsetY"));
         }
@@ -315,7 +359,7 @@
         }
 
         renderLine(line, data) {
-            let children = data && data.render() || [];
+            let children = data && data.render(this.editor) || [];
             line.innerHTML = "";
             children.forEach((x, j) => {
                 line.appendChild(x);
@@ -333,6 +377,7 @@
             this.layer_active_line.update();
             this.layer_caret.update();
             this.layer_selection.update();
+            this.layer_error.update();
         }
 
         focus() {
@@ -348,6 +393,14 @@
             // We give us a little bit of space at the bottom, 2 lines
             if (this.scroll.scrollY + deltaY > (this.editor.data.lines.length - this.layer_inner.lineCount + 2) * this.C.get("view.line.height")) return Math.max(0, (this.editor.data.lines.length - this.layer_inner.lineCount + 2) * this.C.get("view.line.height") - this.scroll.scrollY);
             return deltaY;
+        }
+
+        markError(line, err) {
+            this.gutter.markError(line, err);
+        }
+
+        resetErrors() {
+            this.gutter.errors = {};
         }
     }
 

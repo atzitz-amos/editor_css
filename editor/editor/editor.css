@@ -1,6 +1,6 @@
 @font-face {
     font-family: JetBrains;
-    src: url("font/JetBrainsMono-Light.ttf");
+    src: url("_res/JetBrainsMono-Light.ttf");
 }
 
 .editor * {
@@ -96,11 +96,15 @@
 .editor .layer-inner {
     z-index: 3;
     flex-direction: column;
-    color: #d6d1d1;
+    color: white;
 }
 
 .editor .layer-caret {
     z-index: 4;
+}
+
+.editor .layer-error {
+    z-index: 5;
 }
 
 .editor .editor-caret {
@@ -149,6 +153,7 @@
 .editor .line-number {
     text-align: right;
     width: var(--editor-gutter-num-size);
+    margin-top: 2px;
 }
 
 .editor .editor-active-line {
@@ -181,8 +186,44 @@
 }
 
 .selection-end {
-    left: 0px;
+    left: 0;
 }
+
+.editor-error {
+    position: absolute;
+    height: var(--editor-line-height);
+    background: url("_res/error_waves.svg") repeat-x;
+    background-size: contain;
+    background-position-y: calc(var(--editor-line-height) - 5px);
+}
+
+.editor-error .error-msg {
+    opacity: 0;
+    position: absolute;
+    background: #474747;
+    border: 1px solid #9595a5;
+    border-radius: 5px;
+    top: var(--editor-line-height);
+    padding: 5px 10px;
+    letter-spacing: -1px;
+    font-size: .8em;
+    color: white;
+
+    pointer-events: none;
+    transition: opacity .1s;
+}
+
+.editor-error:hover .error-msg {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.editor-msg:hover {
+    opacity: 1;
+    pointer-events: all;
+    user-select: all;
+}
+
 
 .editor.dark {
     --root-bg: #1e1f24;
@@ -191,7 +232,6 @@
 
     --editor-selection-color: #213c73;
 }
-
 
 /*-------------+
 | HIGHLIGHTING |
@@ -205,6 +245,27 @@
     margin: 0 1px 0 5px;
     font-size: .8em;
     letter-spacing: -1px;
+}
+
+.hi-NUMBER {
+    color: #59e6ff;
+}
+
+.hi-STRING {
+    color: #6ecd6e;
+}
+
+.hi-KEYWORD {
+    color: #ff9e64;
+}
+
+.error-icon {
+    background: url("_res/error_icon.png");
+    background-size: cover;
+    width: 16px;
+    height: 16px;
+    margin-top: 4px;
+    margin-left: 40%;
 }
 
 /*
