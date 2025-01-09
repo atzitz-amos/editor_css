@@ -45,7 +45,8 @@
             let AST = parser.parseBlock();
 
             for (let nd of AST) {
-                result = result.concat(new e.components.TokenGroup(this._render(nd.tokens), nd.loc[1], ["hi-stmt", "stmt-" + nd.type]));
+                let tokenGroup = new e.components.TokenGroup(this._render(nd.tokens), nd.loc[1], ["hi-stmt", "stmt-" + nd.type]);
+                result = result.concat(tokenGroup);
             }
 
             return this.fillTheBlanks(result, text);

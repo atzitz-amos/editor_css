@@ -102,6 +102,10 @@
         get active() {
             return this.lines[this.activeLine];
         }
+
+        get textContent() {
+            return this.lines.map(x => x.content).join("\n");
+        }
     }
 
     class Line {
@@ -155,7 +159,14 @@
         }
 
         _render(editor) {
-            return e.parser.highlighter.highlight(editor, this.content, "js");
+            let tks = editor.highlighted_tokens;
+            let result = [];
+            let y = editor.data.lineno(this);
+            // Find the tokens that are in this line
+            for (let tk of tks) {
+                result.push(tk);
+            }
+            return result;
         }
 
         selectWord(pos) {
@@ -219,6 +230,8 @@
     }
 
     class Editor {
+        highlighted_tokens = [];
+
         constructor(handle, element) {
             this.handle = handle;
             this.C = e.properties.get(handle);
@@ -432,8 +445,9 @@
                     line.writeAt(position.tw, data);
                     this.command("caret/moveHoriz", data.length);
 
-                    this.view.render();
                 });
+                this.update_highlighted_tokens();
+                this.view.render();
             });
             this.command.registerCommand("delete", (direction = -1) => {
                 if (this.selection.selectionActive) {
@@ -450,6 +464,7 @@
                     line.deleteAt(position.tw + direction, direction);
 
                     if (direction === -1) this.command("caret/moveHoriz", -1);
+                    this.update_highlighted_tokens();
                     this.view.ensureCaretInView();
                     this.view.render();
                 }
@@ -469,6 +484,7 @@
                 prevLine.content += content;
                 this.data.lines.splice(lineno, 1);
 
+                this.update_highlighted_tokens();
                 this.view.ensureCaretInView();
                 this.view.render();
             });
@@ -496,6 +512,7 @@
                 }
 
                 this.selection.cancel();
+                this.update_highlighted_tokens();
                 this.view.ensureCaretInView();
                 this.view.render();
             });
@@ -506,6 +523,7 @@
                 this.data.lines.splice(++this.data.activeLine, 0, new e.Line(content));
 
                 this.caret.setPosition("logical", 0, this.data.activeLine);
+                this.update_highlighted_tokens();
                 this.view.ensureCaretInView();
                 this.view.render();
             });
@@ -568,6 +586,11 @@
 
         resetErrors() {
             this.view.resetErrors();
+        }
+
+        update_highlighted_tokens() {
+            let text = this.data.textContent;
+            this.highlighted_tokens = e.parser.highlighter.highlight(this, text, "js");
         }
     }
 
